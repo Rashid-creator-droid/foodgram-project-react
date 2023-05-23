@@ -25,7 +25,7 @@ class IngredientsViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientsSerializer
     permission_classes = (ReadOnly,)
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
+    search_fields = ['name']
 
 
 
@@ -137,6 +137,3 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         Basket.objects.get(user=user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-def fasf:
-    sdas
