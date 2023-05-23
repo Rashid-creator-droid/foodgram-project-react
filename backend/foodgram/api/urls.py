@@ -11,12 +11,7 @@ router = DefaultRouter()
 router.register('users', SignUp, basename='users'),
 router.register('tags', TagViewSet, basename='tags')
 router.register('recipes', RecipeViewSet, basename='recipes')
-
-router.register('download_shopping_cart', TagViewSet, basename='basket')
-router.register('subscriptions', TagViewSet, basename='subscriptions')
 router.register('ingredients', IngredientsViewSet, basename='ingredients')
-
-
 
 
 urlpatterns = [

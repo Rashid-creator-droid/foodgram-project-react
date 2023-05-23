@@ -2,23 +2,15 @@ from django.shortcuts import get_object_or_404
 from djoser.serializers import SetPasswordSerializer
 from djoser.views import UserViewSet
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from core.pagination import LargeResultsSetPagination
 from .serializers import MeSerializer, \
-    SignUpSerializer, SubscriptionSerializer
-from rest_framework import mixins, status, viewsets
+    SignUpSerializer, FollowSerializer
+from rest_framework import status
 from users.models import User, Follow
 
-
-class CreateDestroyViewSet(
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-):
-    pass
 
 class SignUp(UserViewSet):
     queryset = User.objects.all()
@@ -51,11 +43,10 @@ class SignUp(UserViewSet):
         permission_classes=[IsAuthenticated],
     )
     def subscriptions(self, request):
-        """Список авторов, на которых подписан пользователь."""
         user = request.user
         queryset = user.follower.all()
         pages = self.paginate_queryset(queryset)
-        serializer = SubscriptionSerializer(
+        serializer = FollowSerializer(
             pages, many=True, context={'request': request})
         return self.get_paginated_response(serializer.data)
 
@@ -73,13 +64,13 @@ class SignUp(UserViewSet):
                 {'errors': 'Попытка подписки/отписки на/от себя.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        subscription = Follow.objects.filter(
+        follow = Follow.objects.filter(
             author=author,
             user=user,
         )
 
         if request.method == 'POST':
-            if subscription.exists():
+            if follow.exists():
                 return Response(
                     {'errors': f'Вы уже подписаны на пользователя {author.username}'},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -88,19 +79,19 @@ class SignUp(UserViewSet):
                 author=author,
                 user=user,
             )
-            serializer = SubscriptionSerializer(
+            serializer = FollowSerializer(
                 queryset,
                 context={'request': request},
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            if not subscription.exists():
+            if not follow.exists():
                 return Response(
                     {'errors': f'Вы не были подписаны на пользователя {author.username}'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            subscription.delete()
+            follow.delete()
             return Response(
                 {f'Вы отписаны от пользователя {author.username}'},
                 status=status.HTTP_204_NO_CONTENT,

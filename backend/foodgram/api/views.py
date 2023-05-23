@@ -6,6 +6,7 @@ from rest_framework.permissions import SAFE_METHODS, IsAuthenticated, IsAuthenti
 
 from core.filters import RecipeFilter
 from core.pagination import LargeResultsSetPagination
+from users.serializers import SpecialRecipeSerializer
 from .permissions import ReadOnly
 from .serializers import TagSerializer, RecipeSerializer, IngredientsSerializer, RecipeEditSerializer, \
     FavoriteSerializer, ShoppingCartSerializer
@@ -17,7 +18,6 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (ReadOnly,)
-
 
 
 class IngredientsViewSet(viewsets.ModelViewSet):
@@ -43,97 +43,82 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-
-
-class FavoriteView(viewsets.ModelViewSet):
-    permissions = (IsAuthenticatedOrReadOnly, )
-
     @action(
-        methods=[
-            "post",
-        ],
         detail=True,
+        methods=['post', 'delete'],
+        url_path='favorite',
     )
-    def post(self, request, recipe_id):
+    def favorite(self, request, pk=None):
         user = request.user
-        data = {
-            "user": user.id,
-            "recipe": recipe_id,
-        }
-        if Favorites.objects.filter(
-            user=user, recipe__id=recipe_id
-        ).exists():
-            return Response(
-                {"Ошибка": "Уже в избранном"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        serializer = FavoriteSerializer(
-            data=data, context={"request": request}
+        recipe = get_object_or_404(Recipe, id=pk)
+        favorites = Favorites.objects.filter(
+            recipe=recipe,
+            user=user,
         )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @action(
-        methods=[
-            "DELETE",
-        ],
-        detail=True,
-    )
-    def delete(self, request, recipe_id):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        if not Favorites.objects.filter(
-            user=user, recipe=recipe
-        ).exists():
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        Favorites.objects.get(user=user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class ShoppingCartViewSet(viewsets.ModelViewSet):
-
-    permission_classes = [IsAuthenticatedOrReadOnly, ]
-    pagination_class = None
-
-    @action(
-        methods=[
-            "post"
-        ],
-        detail=True,
-    )
-    def post(self, request, recipe_id):
-        user = request.user
-        data = {
-            "user": user.id,
-            "recipe": recipe_id,
-        }
-        if Basket.objects.filter(
-                user=user, recipe__id=recipe_id
-        ).exists():
-            return Response(
-                {"Ошибка": "Уже есть в корзине"},
-                status=status.HTTP_400_BAD_REQUEST,
+        if request.method == 'POST':
+            if favorites.exists():
+                return Response(
+                    {'errors': f'Вы уже добавили {recipe.name} в список избранного'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            Favorites.objects.create(
+                recipe=recipe,
+                user=user,
             )
-        serializer = ShoppingCartSerializer(
-            data=data, context={"request": request}
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer = SpecialRecipeSerializer(
+                recipe,
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        if request.method == 'DELETE':
+            if not favorites.exists():
+                return Response(
+                    {'errors': f'Вы не добавляли {recipe.name} в список избранного'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            favorites.delete()
+            return Response(
+                {f'Вы удалили {recipe.name} из списка избранного'},
+                status=status.HTTP_204_NO_CONTENT,
+            )
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(
-        method=[
-            "delete",
-        ],
         detail=True,
+        methods=['post', 'delete'],
+        url_path='shopping_cart',
     )
-    def delete(self, request, recipe_id):
+    def shopping_cart(self, request, pk=None):
         user = request.user
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        if not Basket.objects.filter(
-            user=user, recipe=recipe
-        ).exists():
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        Basket.objects.get(user=user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        recipe = get_object_or_404(Recipe, id=pk)
+        basket = Basket.objects.filter(
+            recipe=recipe,
+            user=user,
+        )
+        if request.method == 'POST':
+            if basket.exists():
+                return Response(
+                    {'errors': f'Вы уже добавили {recipe.name} в корзину'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            Basket.objects.create(
+                recipe=recipe,
+                user=user,
+            )
+            serializer = SpecialRecipeSerializer(
+                recipe,
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        if request.method == 'DELETE':
+            if not basket.exists():
+                return Response(
+                    {'errors': f'Вы не добавляли {recipe.name} в корзину'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            basket.delete()
+            return Response(
+                {f'Вы удалили {recipe.name} из корзины'},
+                status=status.HTTP_204_NO_CONTENT,
+            )
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)

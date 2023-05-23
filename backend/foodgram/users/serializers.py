@@ -44,6 +44,7 @@ class SignUpSerializer(UserSerializer):
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
 
+
 class SpecialRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
@@ -54,7 +55,7 @@ class SpecialRecipeSerializer(serializers.ModelSerializer):
             "cooking_time",
         )
 
-class SubscriptionSerializer(serializers.ModelSerializer):
+class FollowSerializer(serializers.ModelSerializer):
     email = serializers.ReadOnlyField(source='author.email')
     id = serializers.ReadOnlyField(source='author.id')
     username = serializers.ReadOnlyField(source='author.username')

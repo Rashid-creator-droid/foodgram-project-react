@@ -5,13 +5,11 @@ from django.db.models import DateTimeField
 User = get_user_model()
 
 
-
 class Ingredients(models.Model):
     name = models.CharField('Название', max_length=150)
     measurement_unit = models.CharField(
         verbose_name="Единица измерения", max_length=200
     )
-
 
     class Meta:
         verbose_name = 'Ингредиент'
@@ -105,6 +103,17 @@ class Favorites(models.Model):
         on_delete=models.CASCADE,
     )
 
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
+        ordering = ['id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='uniquefavorit'
+            )
+        ]
+
 
 class Basket(models.Model):
     user = models.ForeignKey(
@@ -117,3 +126,14 @@ class Basket(models.Model):
         related_name='basket',
         on_delete=models.CASCADE,
     )
+
+    class Meta:
+        verbose_name = 'Корзина'
+        verbose_name_plural = 'Корзины'
+        ordering = ['id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='uniquebasket'
+            )
+        ]
