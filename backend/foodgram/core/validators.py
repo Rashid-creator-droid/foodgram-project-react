@@ -1,7 +1,5 @@
 from rest_framework.validators import ValidationError
 
-from recipe.models import Ingredient
-
 
 def validate_ingredients(data):
     if not data:
@@ -12,19 +10,7 @@ def validate_ingredients(data):
         raise ValidationError(
             {'ingredients': 'Отсутствуют ингредиенты'}
         )
-    unique_ingredient = []
     for ingredient in data:
-        if not Ingredient.objects.filter(
-                id=ingredient.get('id')
-        ).exists():
-            raise ValidationError(
-                {'ingredients': 'Такого ингредиента нет'}
-            )
-        if id in unique_ingredient:
-            raise ValidationError(
-                {'ingredients': 'Повторы запрещены'}
-            )
-        unique_ingredient.append(id)
         amount = int(ingredient.get('amount'))
         if amount < 1:
             raise ValidationError(
