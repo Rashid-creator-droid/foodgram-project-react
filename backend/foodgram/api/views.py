@@ -60,7 +60,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
     def added(self, model, pk, name, user):
-        recipe = get_object_or_404(Recipe, pk=pk)
+        recipe = get_object_or_404(Recipe, id=pk)
         relation = model.objects.filter(user=user, recipe=recipe)
         if relation.exists():
             return Response(
@@ -72,7 +72,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def deleted(self, model, user, pk, name):
-        recipe = get_object_or_404(Recipe, pk=pk)
+        recipe = get_object_or_404(Recipe, id=pk)
         relation = model.objects.filter(user=user, recipe=recipe)
         if not relation.exists():
             return Response(
