@@ -3,7 +3,10 @@ from djoser.serializers import SetPasswordSerializer
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.response import Response
 
 from core.pagination import LargeResultsSetPagination
@@ -75,7 +78,7 @@ class SignUp(UserViewSet):
         if request.method == 'POST':
             if follow.exists():
                 return Response(
-                    {'errors': f'Вы уже подписаны на пользователя {author.username}'},
+                    {'errors': f'Вы уже подписаны на {author.username}'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             queryset = Follow.objects.create(
@@ -91,7 +94,7 @@ class SignUp(UserViewSet):
         if request.method == 'DELETE':
             if not follow.exists():
                 return Response(
-                    {'errors': f'Вы не были подписаны на пользователя {author.username}'},
+                    {'errors': f'Нет подписки на {author.username}'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             follow.delete()

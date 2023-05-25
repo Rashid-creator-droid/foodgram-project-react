@@ -69,7 +69,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if request.method == 'POST':
             if favorites.exists():
                 return Response(
-                    {'errors': f'Вы уже добавили {recipe.name} в список избранного'},
+                    {'errors': f'Вы уже добавили {recipe.name} в избранное'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             Favorites.objects.create(
@@ -87,7 +87,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if request.method == 'DELETE':
             if not favorites.exists():
                 return Response(
-                    {'errors': f'Вы не добавляли {recipe.name} в список избранного'},
+                    {'errors': f'Вы не добавляли {recipe.name} в избранное'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             favorites.delete()
@@ -166,7 +166,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         pdf.set_font('DejaVu', size=14)
         pdf.cell(
             w=0,
-            txt=f'Список ингредиентов для покупки пользователя {user.username}',
+            txt=f'Список ингредиентов пользователя {user.username}',
             align='C',
         )
         pdf.ln(10)

@@ -14,7 +14,9 @@ class Command(BaseCommand):
             for ingredient in data:
                 ingredients.pk = index
                 ingredients.name = ingredient.get('name')
-                ingredients.measurement_unit = ingredient.get('measurement_unit')
+                ingredients.measurement_unit = ingredient.get(
+                    'measurement_unit'
+                )
                 ingredients.save()
                 index += 1
         print('finished')
