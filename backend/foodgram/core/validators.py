@@ -1,44 +1,37 @@
-from rest_framework.validators import ValidationError as RFError
+from rest_framework.validators import ValidationError
 
-from recipe.models import Ingredient, Tag
-
-
-def validate_time(value):
-    """Валидация поля модели - время приготовления."""
-    if value < 1:
-        raise RFError(
-            ['Время не может быть менее минуты.']
-        )
+from recipe.models import Ingredient
 
 
 def validate_ingredients(data):
     if not data:
-        raise RFError({'ingredients': ['Обязательное поле.']})
+        raise ValidationError(
+            {'ingredients': 'Обязательное поле.'}
+        )
     if len(data) < 1:
-        raise RFError({'ingredients': ['Не переданы ингредиенты.']})
+        raise ValidationError(
+            {'ingredients': 'Отсутствуют ингредиенты'}
+        )
     unique_ingredient = []
     for ingredient in data:
-        if not ingredient.get('id'):
-            raise RFError({'ingredients': ['Отсутствует id ингредиента.']})
-        id = ingredient.get('id')
-        if not Ingredient.objects.filter(id=id).exists():
-            raise RFError({'ingredients': ['Ингредиента нет в БД.']})
+        if not Ingredient.objects.filter(
+                id=ingredient.get('id')
+        ).exists():
+            raise ValidationError(
+                {'ingredients': 'Такого ингредиента нет'}
+            )
         if id in unique_ingredient:
-            raise RFError(
-                {'ingredients': ['Нельзя дублировать имена ингредиентов.']})
+            raise ValidationError(
+                {'ingredients': 'Повторы запрещены'}
+            )
         unique_ingredient.append(id)
         amount = int(ingredient.get('amount'))
         if amount < 1:
-            raise RFError({'amount': ['Количество не может быть менее 1.']})
-    return data
-
-
-def validate_tags(data):
-    if not data:
-        raise RFError({'tags': ['Обязательное поле.']})
-    if len(data) < 1:
-        raise RFError({'tags': ['Хотя бы один тэг должен быть указан.']})
-    for tag in data:
-        if not Tag.objects.filter(id=tag).exists():
-            raise RFError({'tags': ['Тэг отсутствует в БД.']})
+            raise ValidationError(
+                {'amount': 'Количество не может быть меньше 1'}
+            )
+        if amount > 1000:
+            raise ValidationError(
+                {'amount': 'Количество не может быть меньше 1000'}
+            )
     return data
