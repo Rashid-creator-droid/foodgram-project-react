@@ -59,26 +59,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(
-        detail=True,
-        methods=['post', 'delete'],
-        url_path='favorite',
-        filterset_class=RecipeFilter,
-    )
-    def favorite(self, request, pk=None):
+    @staticmethod
+    def supplementation(model, pk, name, request):
         user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
-        favorites = Favorites.objects.filter(
+        sample = model.objects.filter(
             recipe=recipe,
             user=user,
         )
         if request.method == 'POST':
-            if favorites.exists():
+            if sample.exists():
                 return Response(
-                    {'errors': f'Вы уже добавили {recipe.name} в избранное'},
+                    {'errors': f'Вы уже добавили {recipe.name} в {name}'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            Favorites.objects.create(
+            model.objects.create(
                 recipe=recipe,
                 user=user,
             )
@@ -91,14 +86,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
 
         if request.method == 'DELETE':
-            if not favorites.exists():
+            if not model.exists():
                 return Response(
-                    {'errors': f'Вы не добавляли {recipe.name} в избранное'},
+                    {'errors': f'Вы не добавляли {recipe.name} в {name}'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            favorites.delete()
+            model.delete()
             return Response(
-                {f'Вы удалили {recipe.name} из списка избранного'},
+                {f'Вы удалили {recipe.name} из списка {name}'},
                 status=status.HTTP_204_NO_CONTENT,
             )
         return Response(
@@ -108,42 +103,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         detail=True,
         methods=['post', 'delete'],
+        url_path='favorite',
+        filterset_class=RecipeFilter,
+    )
+    def favorite(self, request, pk=None):
+        name = 'избранное'
+        return self.supplementation(Favorites, pk, name, request)
+
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
         url_path='shopping_cart',
     )
     def shopping_cart(self, request, pk=None):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        basket = Basket.objects.filter(
-            recipe=recipe,
-            user=user,
-        )
-        if request.method == 'POST':
-            if basket.exists():
-                return Response(
-                    {'errors': f'Вы уже добавили {recipe.name} в корзину'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            Basket.objects.create(
-                recipe=recipe,
-                user=user,
-            )
-            serializer = SpecialRecipeSerializer(
-                recipe,
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
-            if not basket.exists():
-                return Response(
-                    {'errors': f'Вы не добавляли {recipe.name} в корзину'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            basket.delete()
-            return Response(
-                {f'Вы удалили {recipe.name} из корзины'},
-                status=status.HTTP_204_NO_CONTENT,
-            )
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        name = 'корзину'
+        return self.supplementation(Basket, pk, name, request)
 
     @action(
         detail=False,
