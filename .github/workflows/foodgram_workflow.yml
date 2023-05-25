@@ -57,7 +57,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             sudo docker-compose stop
-            sudo docker-compose rm backend
+            sudo docker rm backend
             sudo docker rmi valentaine98/foodgram_backend
             rm -f .env
             touch .env
