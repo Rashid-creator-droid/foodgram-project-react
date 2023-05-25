@@ -1,4 +1,4 @@
-# praktikum_new_diplom
+# Продуктовый помощник
 
 
 ![dsd](https://github.com/Rashid-creator-droid/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg?event=push)
