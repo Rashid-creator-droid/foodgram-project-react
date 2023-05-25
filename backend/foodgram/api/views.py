@@ -2,7 +2,7 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from fpdf import FPDF
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -27,6 +27,10 @@ from .serializers import (
 )
 
 
+class IngredientFilter(filters.SearchFilter):
+    search_param = 'name'
+
+
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
@@ -37,6 +41,8 @@ class IngredientsViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
     permission_classes = [ReadOnly]
+    filter_backends = [IngredientFilter]
+    search_fields = ('^name',)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

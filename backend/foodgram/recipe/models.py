@@ -67,7 +67,6 @@ class Recipe(models.Model):
         Ingredient,
         through='RecipeIngredients',
         verbose_name='Ингредиенты',
-        related_name='recipes',
     )
     tags = models.ManyToManyField(
         Tag,
@@ -78,7 +77,7 @@ class Recipe(models.Model):
         verbose_name='Время приготовления',
         validators=[
             MaxValueValidator(
-                3000,
+                1000,
                 message='Время приготовления не может быть таким большим'
             ),
             MinValueValidator(
