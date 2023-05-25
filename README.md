@@ -1,5 +1,7 @@
 # Продуктовый помощник
 
+- Логин admin1
+- Пароль admin
 
 ![dsd](https://github.com/Rashid-creator-droid/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg?event=push)
 
