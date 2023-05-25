@@ -16,7 +16,7 @@ SECRET_KEY = 'django-insecure-oz1b0q&5vj8^$1+oebr9#htb!ua+jgs325%$8kh6*zma8_2omb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['158.160.99.26']
+ALLOWED_HOSTS = ['158.160.99.26', 'backend']
 
 # CSRF
 
