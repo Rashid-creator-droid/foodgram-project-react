@@ -4,8 +4,6 @@ on: [push]
 
 jobs:
 
-
-
   deploy:
       runs-on: ubuntu-latest
       if: github.ref == 'refs/heads/master'
@@ -17,6 +15,9 @@ jobs:
             username: ${{ secrets.USER }}
             key: ${{ secrets.SSH_KEY }}
             script: |
+              sudo docker-compose stop
+              sudo docker-compose rm backend
+              sudo docker rmi valentaine98/foodgram_backend
               rm -f .env
               touch .env
               echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
@@ -25,3 +26,4 @@ jobs:
               echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
               echo DB_HOST=${{ secrets.DB_HOST }} >> .env
               echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+              sudo docker-compose up -d 
