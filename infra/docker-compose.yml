@@ -12,8 +12,7 @@ services:
   backend:
     container_name: backend
     restart: always
-    build:
-      context: ../backend
+    image: valentaine98/foodgram_backend:latest
     expose:
       - 8000
     volumes:
@@ -25,9 +24,8 @@ services:
       - ./.env
 
   frontend:
+    image: valentaine98/foodgram_front:1.0
     container_name: frontend
-    build:
-      context: ../frontend
     volumes:
       - ../frontend/:/app/result_build/
 
