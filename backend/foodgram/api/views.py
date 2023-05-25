@@ -59,8 +59,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @staticmethod
-    def added(model, pk, name, user):
+    def added(self, model, pk, name, user):
         recipe = get_object_or_404(Recipe, pk=pk)
         relation = model.objects.filter(user=user, recipe=recipe)
         if relation.exists():
@@ -72,8 +71,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer = SpecialRecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @staticmethod
-    def deleted(model, user, pk, name):
+    def deleted(self, model, user, pk, name):
         recipe = get_object_or_404(Recipe, pk=pk)
         relation = model.objects.filter(user=user, recipe=recipe)
         if not relation.exists():
