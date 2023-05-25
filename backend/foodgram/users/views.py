@@ -1,21 +1,21 @@
 from django.shortcuts import get_object_or_404
 from djoser.serializers import SetPasswordSerializer
 from djoser.views import UserViewSet
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from core.pagination import LargeResultsSetPagination
+from users.models import User, Follow
 from .serializers import MeSerializer, \
     SignUpSerializer, FollowSerializer
-from rest_framework import status
-from users.models import User, Follow
 
 
 class SignUp(UserViewSet):
     queryset = User.objects.all()
     pagination_class = LargeResultsSetPagination
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_class(self):
         if self.action == 'set_password':
@@ -26,8 +26,8 @@ class SignUp(UserViewSet):
 
     @action(
         detail=False,
-        url_path='me',
         methods=['get'],
+        url_path='me',
         permission_classes=[IsAuthenticated],
     )
     def me(self, request):
@@ -38,8 +38,8 @@ class SignUp(UserViewSet):
 
     @action(
         detail=False,
-        url_path='subscriptions',
         methods=['get'],
+        url_path='subscriptions',
         permission_classes=[IsAuthenticated],
     )
     def subscriptions(self, request):
@@ -47,7 +47,10 @@ class SignUp(UserViewSet):
         queryset = user.follower.all()
         pages = self.paginate_queryset(queryset)
         serializer = FollowSerializer(
-            pages, many=True, context={'request': request})
+            pages,
+            many=True,
+            context={'request': request},
+        )
         return self.get_paginated_response(serializer.data)
 
     @action(

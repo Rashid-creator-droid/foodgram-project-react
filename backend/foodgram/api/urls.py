@@ -5,8 +5,8 @@ from users.views import SignUp
 from .views import TagViewSet, RecipeViewSet, IngredientsViewSet
 
 app_name = 'api'
-router = DefaultRouter()
 
+router = DefaultRouter()
 
 router.register('users', SignUp, basename='users'),
 router.register('tags', TagViewSet, basename='tags')

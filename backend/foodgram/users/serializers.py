@@ -1,30 +1,29 @@
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
-from rest_framework.validators import UniqueTogetherValidator
 
-from users.models import User, Follow
 from recipe.models import Recipe
+from users.models import User, Follow
 
 
 class MeSerializer(UserCreateSerializer):
     class Meta:
         model = User
-        fields = (
+        fields = [
             'id',
             'username',
             'email',
             'first_name',
             'last_name',
             'password',
-        )
-        required_fields = (
+        ]
+        required_fields = [
             'email',
             'username',
             'first_name',
             'last_name',
-            'password'
-        )
+            'password',
+        ]
 
 
 class SignUpSerializer(UserSerializer):
@@ -32,14 +31,20 @@ class SignUpSerializer(UserSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', "first_name", 'is_subscribed', "last_name"]
+        fields = [
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'is_subscribed',
+            'last_name',
+        ]
         read_only_fields = ['id', 'is_subscribed']
 
     def get_is_subscribed(self, obj):
-        """Статус подписки на автора."""
-        user_id = self.context.get('request').user.id
+        user = self.context.get('request').user
         return Follow.objects.filter(
-            author=obj.id, user=user_id).exists()
+            author=obj.id, user=user.id).exists()
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
@@ -48,12 +53,13 @@ class SignUpSerializer(UserSerializer):
 class SpecialRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
-        fields = (
-            "id",
-            "name",
-            "image",
-            "cooking_time",
-        )
+        fields = [
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        ]
+
 
 class FollowSerializer(serializers.ModelSerializer):
     email = serializers.ReadOnlyField(source='author.email')
@@ -68,14 +74,14 @@ class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
         fields = [
-            "email",
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "is_subscribed",
-            "recipes",
-            "recipes_count",
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count',
         ]
 
     def get_is_subscribed(self, obj):
@@ -91,5 +97,6 @@ class FollowSerializer(serializers.ModelSerializer):
         serializer = SpecialRecipeSerializer(recipe_obj, many=True)
         return serializer.data
 
-    def get_recipes_count(self, obj):
+    @staticmethod
+    def get_recipes_count(obj):
         return obj.author.recipe.count()

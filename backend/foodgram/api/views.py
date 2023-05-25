@@ -1,37 +1,47 @@
+from django.db.models import Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
+from fpdf import FPDF
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import SAFE_METHODS, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
 
 from core.filters import RecipeFilter
 from core.pagination import LargeResultsSetPagination
+from recipe.models import (
+    Tag,
+    Recipe,
+    Ingredient,
+    Favorites,
+    Basket,
+    RecipeIngredients,
+)
 from users.serializers import SpecialRecipeSerializer
 from .permissions import ReadOnly
-from .serializers import TagSerializer, RecipeSerializer, IngredientsSerializer, RecipeEditSerializer, \
-    FavoriteSerializer, ShoppingCartSerializer
-from rest_framework import filters, viewsets, status
-from recipe.models import Tag, Recipe, Ingredients, Favorites, Basket
+from .serializers import (
+    TagSerializer,
+    RecipeSerializer,
+    IngredientsSerializer,
+    RecipeEditSerializer,
+)
 
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = (ReadOnly,)
+    permission_classes = [ReadOnly]
 
 
 class IngredientsViewSet(viewsets.ModelViewSet):
-    queryset = Ingredients.objects.all()
+    queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
-    permission_classes = (ReadOnly,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ['name']
-
+    permission_classes = [ReadOnly]
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = [IsAuthenticatedOrReadOnly]
     filterset_class = RecipeFilter
     pagination_class = LargeResultsSetPagination
 
@@ -47,6 +57,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         detail=True,
         methods=['post', 'delete'],
         url_path='favorite',
+        filterset_class=RecipeFilter,
     )
     def favorite(self, request, pk=None):
         user = request.user
@@ -68,7 +79,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer = SpecialRecipeSerializer(
                 recipe,
             )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED,
+            )
 
         if request.method == 'DELETE':
             if not favorites.exists():
@@ -81,7 +95,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 {f'Вы удалили {recipe.name} из списка избранного'},
                 status=status.HTTP_204_NO_CONTENT,
             )
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
 
     @action(
         detail=True,
@@ -122,3 +138,51 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_204_NO_CONTENT,
             )
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    @action(
+        detail=False,
+        methods=['get'],
+        url_path='download_shopping_cart',
+    )
+    def download_cart(self, request):
+        index = 1
+        user = request.user
+        ingredients = RecipeIngredients.objects.filter(
+            recipe__basket__user=user
+        ).values(
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(
+            ingredient_amount=Sum('amount')
+        )
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.add_font(
+            'DejaVu',
+            '',
+            './core/fonts/timesnewromanpsmt.ttf',
+            uni=True,
+        )
+        pdf.set_font('DejaVu', size=14)
+        pdf.cell(
+            w=0,
+            txt=f'Список ингредиентов для покупки пользователя {user.username}',
+            align='C',
+        )
+        pdf.ln(10)
+        for ingredient in ingredients:
+            name = ingredient['ingredient__name']
+            unit = ingredient['ingredient__measurement_unit']
+            amount = ingredient['ingredient_amount']
+            pdf.cell(50, 10, f'{index}) {name} {amount} {unit}')
+            pdf.ln()
+            index += 1
+        response = HttpResponse(
+            bytes(pdf.output()),
+            content_type='application/pdf',
+            status=status.HTTP_200_OK,
+        )
+        response['Content-Disposition'] = (
+            'attachment; filename="shopping_cart.pdf"'
+        )
+        return response

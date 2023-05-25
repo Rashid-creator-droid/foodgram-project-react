@@ -1,14 +1,11 @@
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
-
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -21,9 +18,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = ['http://*.localhost']
-CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_DOMAIN = 'backend'
+# CSRF
+
+# CSRF_TRUSTED_ORIGINS = ['http://*.localhost']
+# CSRF_COOKIE_SECURE = False
+# CSRF_COOKIE_DOMAIN = 'backend'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -38,9 +38,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework.authtoken',
     'django_filters',
+    'colorfield',
     'api.apps.ApiConfig',
     'recipe.apps.RecipeConfig',
-    'users',
+    'users.apps.UsersConfig',
 ]
 
 
@@ -54,6 +55,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# CORS
 
 CORS_URLS_REGEX = r'^/api/.*$'
 CORS_ORIGIN_ALLOW_ALL = True
@@ -139,6 +142,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
+# Rest framework (DRF, Djoser)
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
@@ -152,12 +157,12 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
     ],
 }
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DJOSER = {
     'HIDE_USERS': False,
     'LOGIN_FIELD': 'email',
 }
+# Default primary key field type
+# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DATE_TIME_FORMAT = '%d/%m/%Y %H:%M'
