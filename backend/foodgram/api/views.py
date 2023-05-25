@@ -59,10 +59,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def added(self, model, pk, name, user):
+    def added(self, model, user, pk, name):
         recipe = get_object_or_404(Recipe, id=pk)
-        relation = model.objects.filter(user=user, recipe=recipe)
-        if relation.exists():
+        if model.objects.filter(user=user, recipe=recipe).exists():
             return Response(
                 {'errors': f'Вы уже добавили {recipe.name} в {name}'},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -73,13 +72,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def deleted(self, model, user, pk, name):
         recipe = get_object_or_404(Recipe, id=pk)
-        relation = model.objects.filter(user=user, recipe=recipe)
-        if not relation.exists():
+        removable = model.objects.filter(user=user, recipe=recipe)
+        if not removable.exists():
             return Response(
                 {'errors': f'Вы не добавляли {recipe.name} в {name}'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        relation.delete()
+        removable.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
