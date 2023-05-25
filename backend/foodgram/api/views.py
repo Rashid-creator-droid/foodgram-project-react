@@ -60,45 +60,29 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
     @staticmethod
-    def supplementation(model, pk, name, request):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        sample = model.objects.filter(
-            recipe=recipe,
-            user=user,
-        )
-        if request.method == 'POST':
-            if sample.exists():
-                return Response(
-                    {'errors': f'Вы уже добавили {recipe.name} в {name}'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            model.objects.create(
-                recipe=recipe,
-                user=user,
-            )
-            serializer = SpecialRecipeSerializer(
-                recipe,
-            )
+    def added(model, pk, name, user):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        relation = model.objects.filter(user=user, recipe=recipe)
+        if relation.exists():
             return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED,
+                {'errors': f'Вы уже добавили {recipe.name} в {name}'},
+                status=status.HTTP_400_BAD_REQUEST,
             )
+        model.objects.create(user=user, recipe=recipe)
+        serializer = SpecialRecipeSerializer(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if request.method == 'DELETE':
-            if not model.exists():
-                return Response(
-                    {'errors': f'Вы не добавляли {recipe.name} в {name}'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            model.delete()
+    @staticmethod
+    def deleted(model, user, pk, name):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        relation = model.objects.filter(user=user, recipe=recipe)
+        if not relation.exists():
             return Response(
-                {f'Вы удалили {recipe.name} из списка {name}'},
-                status=status.HTTP_204_NO_CONTENT,
+                {'errors': f'Вы не добавляли {recipe.name} в {name}'},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        return Response(
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
+        relation.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True,
@@ -108,7 +92,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def favorite(self, request, pk=None):
         name = 'избранное'
-        return self.supplementation(Favorites, pk, name, request)
+        user = request.user
+        if request.method == 'POST':
+            return self.added(Favorites, user, pk, name)
+        if request.method == 'DELETE':
+            return self.deleted(Favorites, user, pk, name)
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(
         detail=True,
@@ -116,8 +105,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path='shopping_cart',
     )
     def shopping_cart(self, request, pk=None):
-        name = 'корзину'
-        return self.supplementation(Basket, pk, name, request)
+        name = 'список покупок'
+        user = request.user
+        if request.method == 'POST':
+            return self.added(Basket, user, pk, name)
+        if request.method == 'DELETE':
+            return self.deleted(Basket, user, pk, name)
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(
         detail=False,
