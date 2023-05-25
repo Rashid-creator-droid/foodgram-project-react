@@ -60,7 +60,6 @@ class Recipe(models.Model):
     image = models.ImageField(
         verbose_name='Картинка',
         upload_to='recipe/images',
-        blank=True,
     )
     text = models.TextField(verbose_name='Описание', max_length=1000)
     ingredients = models.ManyToManyField(
