@@ -44,12 +44,12 @@ class RecipeAdmin(admin.ModelAdmin):
         IngredientsInLine,
     )
 
-    def __preview(self, obj):
+    def preview(self, obj):
         return mark_safe(
             f'<img src="{obj.image.url}" style="max-height: 50px;">'
         )
 
-    def __favorite_count(self, obj):
+    def favorite_count(self, obj):
         return obj.favorite.count()
 
 
