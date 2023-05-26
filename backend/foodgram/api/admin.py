@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from recipe.models import Ingredient, Recipe, Tag, Favorites, Basket
 from users.models import User, Follow
@@ -20,6 +20,7 @@ class IngredientAdmin(admin.ModelAdmin):
         'name',
     )
 
+
 class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
@@ -31,6 +32,7 @@ class CustomUserCreationForm(UserCreationForm):
 class UserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
         model = User
+
 
 @admin.register(User)
 class UserAdmin(UserAdmin):
