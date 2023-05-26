@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from django.utils.safestring import mark_safe
 
 from recipe.models import Ingredient, Recipe, Tag, Favorites, Basket
@@ -19,12 +20,20 @@ class IngredientAdmin(admin.ModelAdmin):
 
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(UserAdmin):
     list_display = (
         'username',
         'email',
         'first_name',
         'last_name',
+    )
+    fields = (
+        'username',
+        ('last_name', 'first_name'),
+        'email', 'password',
+        ('is_superuser', 'is_staff', 'is_active'),
+        ('date_joined', 'last_login'),
+        'groups'
     )
     search_fields = (
         'username',
