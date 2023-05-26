@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 
 from recipe.models import Ingredient, Recipe, Tag, Favorites, Basket
-from users.models import Follow
 
 
 @admin.register(Ingredient)
@@ -45,12 +44,12 @@ class RecipeAdmin(admin.ModelAdmin):
         IngredientsInLine,
     )
 
-    def preview(self, obj):
+    def __preview(self, obj):
         return mark_safe(
             f'<img src="{obj.image.url}" style="max-height: 50px;">'
         )
 
-    def favorite_count(self, obj):
+    def __favorite_count(self, obj):
         return obj.favorite.count()
 
 
@@ -77,19 +76,6 @@ class FavoriteAdmin(admin.ModelAdmin):
     search_fields = (
         'user__username',
         'recipe__name',
-    )
-
-
-@admin.register(Follow)
-class FollowAdmin(admin.ModelAdmin):
-    list_display = (
-        'id',
-        'user',
-        'author',
-    )
-    search_fields = (
-        'user__username',
-        'author__username',
     )
 
 

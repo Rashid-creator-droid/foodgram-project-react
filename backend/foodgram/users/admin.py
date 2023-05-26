@@ -4,6 +4,8 @@ from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 
+from users.models import Follow
+
 User = get_user_model()
 
 
@@ -46,4 +48,17 @@ class UserAdmin(UserAdmin):
     list_filter = (
         'username',
         'email',
+    )
+
+
+@admin.register(Follow)
+class FollowAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'user',
+        'author',
+    )
+    search_fields = (
+        'user__username',
+        'author__username',
     )

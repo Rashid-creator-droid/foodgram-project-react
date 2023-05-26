@@ -1,5 +1,4 @@
 import os
-from decouple import config
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,12 +9,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-# django-insecure-oz1b0q&5vj8^$1+oebr9#htb!ua+jgs325%$8kh6*zma8_2omb
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='valen_server.env')
+
+SECRET_KEY = os.getenv('SECRET_KEY', default='valen_server.env')
 
 # SECURITY WARNING:don't run with debug turned on in production!
+
 DEBUG = False
 
 ALLOWED_HOSTS = ['158.160.99.26', 'backend', 'backend:8000']
@@ -172,6 +171,5 @@ DATE_TIME_FORMAT = '%d/%m/%Y %H:%M'
 # Constants
 
 PAGE_SIZE = 6
-FIRST_INDEX = 1
 MAX_AMOUNT = 1000
 MIN_AMOUNT = 1

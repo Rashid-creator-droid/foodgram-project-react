@@ -9,6 +9,7 @@ from rest_framework.response import Response
 
 from api.filters import RecipeFilter
 from core.pagination import LargeResultsSetPagination
+from foodgram.settings import FIRST_INDEX
 from recipe.models import (
     Tag,
     Recipe,
@@ -81,6 +82,38 @@ class RecipeViewSet(viewsets.ModelViewSet):
         removable.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def pdf_generated(self, user):
+        ingredients = RecipeIngredients.objects.filter(
+            recipe__basket__user=user
+        ).values(
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(
+            ingredient_amount=Sum('amount')
+        )
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.add_font(
+            'DejaVu',
+            '',
+            './core/fonts/timesnewromanpsmt.ttf',
+            uni=True,
+        )
+        pdf.set_font('DejaVu', size=14)
+        pdf.cell(
+            w=0,
+            txt=f'Список ингредиентов пользователя {user.username}',
+            align='C',
+        )
+        pdf.ln(10)
+        for index, ingredient in enumerate(ingredients):
+            name = ingredient['ingredient__name']
+            unit = ingredient['ingredient__measurement_unit']
+            amount = ingredient['ingredient_amount']
+            pdf.cell(50, 10, f'{index}) {name} {amount} {unit}')
+            pdf.ln()
+        return pdf.output()
+
     @action(
         detail=True,
         methods=['post', 'delete'],
@@ -116,40 +149,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path='download_shopping_cart',
     )
     def download_cart(self, request):
-        index = 1
-        user = request.user
-        ingredients = RecipeIngredients.objects.filter(
-            recipe__basket__user=user
-        ).values(
-            'ingredient__name',
-            'ingredient__measurement_unit'
-        ).annotate(
-            ingredient_amount=Sum('amount')
-        )
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.add_font(
-            'DejaVu',
-            '',
-            './core/fonts/timesnewromanpsmt.ttf',
-            uni=True,
-        )
-        pdf.set_font('DejaVu', size=14)
-        pdf.cell(
-            w=0,
-            txt=f'Список ингредиентов пользователя {user.username}',
-            align='C',
-        )
-        pdf.ln(10)
-        for ingredient in ingredients:
-            name = ingredient['ingredient__name']
-            unit = ingredient['ingredient__measurement_unit']
-            amount = ingredient['ingredient_amount']
-            pdf.cell(50, 10, f'{index}) {name} {amount} {unit}')
-            pdf.ln()
-            index += 1
         response = HttpResponse(
-            bytes(pdf.output()),
+            bytes(self.pdf_generated(request.user)),
             content_type='application/pdf',
             status=status.HTTP_200_OK,
         )
