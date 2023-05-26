@@ -29,7 +29,7 @@ class CustomUserCreationForm(UserCreationForm):
         field_classes = UserCreationForm.Meta.field_classes
 
 
-class UserChangeForm(UserChangeForm):
+class UserAdminChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
         model = User
 
@@ -51,7 +51,7 @@ class UserAdmin(UserAdmin):
         'first_name',
         'last_name',
     )
-    form = UserChangeForm
+    form = UserAdminChangeForm
     model = User
     search_fields = (
         'username',
