@@ -59,7 +59,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def added(self, model, user, pk, name):
+    def __added(self, model, user, pk, name):
         recipe = get_object_or_404(Recipe, id=pk)
         if model.objects.filter(user=user, recipe=recipe).exists():
             return Response(
@@ -70,7 +70,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer = SpecialRecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def deleted(self, model, user, pk, name):
+    def __deleted(self, model, user, pk, name):
         recipe = get_object_or_404(Recipe, id=pk)
         removable = model.objects.filter(user=user, recipe=recipe)
         if not removable.exists():
@@ -109,7 +109,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             name = ingredient['ingredient__name']
             unit = ingredient['ingredient__measurement_unit']
             amount = ingredient['ingredient_amount']
-            pdf.cell(50, 10, f'{index}) {name} {amount} {unit}')
+            pdf.cell(50, 10, f'{index + 1}) {name} {amount} {unit}')
             pdf.ln()
         return pdf.output()
 
@@ -123,9 +123,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         name = 'избранное'
         user = request.user
         if request.method == 'POST':
-            return self.added(Favorites, user, pk, name)
+            return self.__added(Favorites, user, pk, name)
         if request.method == 'DELETE':
-            return self.deleted(Favorites, user, pk, name)
+            return self.__deleted(Favorites, user, pk, name)
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(
@@ -137,9 +137,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         name = 'список покупок'
         user = request.user
         if request.method == 'POST':
-            return self.added(Basket, user, pk, name)
+            return self.__added(Basket, user, pk, name)
         if request.method == 'DELETE':
-            return self.deleted(Basket, user, pk, name)
+            return self.__deleted(Basket, user, pk, name)
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(
