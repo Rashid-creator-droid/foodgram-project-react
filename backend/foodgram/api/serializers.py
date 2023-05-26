@@ -125,7 +125,7 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
-    def create_ingredients(self, ingredients, recipe):
+    def __create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
             RecipeIngredients.objects.bulk_create(
                 [
@@ -155,7 +155,7 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         if 'ingredients' in validated_data:
             ingredients = validated_data.pop('ingredients')
             instance.ingredients.clear()
-            self.create_ingredients(ingredients, instance)
+            self.__create_ingredients(ingredients, instance)
         if 'tags' in validated_data:
             instance.tags.set(
                 validated_data.pop('tags')
