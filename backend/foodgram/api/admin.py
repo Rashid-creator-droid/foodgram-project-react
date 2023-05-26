@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.forms import UserChangeForm
+from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext, gettext_lazy as _
 
 from recipe.models import Ingredient, Recipe, Tag, Favorites, Basket
 from users.models import User, Follow
@@ -19,31 +20,37 @@ class IngredientAdmin(admin.ModelAdmin):
         'name',
     )
 
+class CustomUserCreationForm(UserCreationForm):
+
+    class Meta:
+        model = UserCreationForm.Meta.model
+        fields = '__all__'
+        field_classes = UserCreationForm.Meta.field_classes
+
 
 class UserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
         model = User
 
-
 @admin.register(User)
 class UserAdmin(UserAdmin):
-    form = UserChangeForm
-    model = User
+    add_form = CustomUserCreationForm
+    add_fieldsets = (
+        (None, {'fields': ('username', 'password1', 'password2')}),
+        (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
+        (_('Permissions'), {
+            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups'),
+        }),
+        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+    )
     list_display = (
         'username',
         'email',
         'first_name',
         'last_name',
     )
-    fields = (
-        'username',
-        ('last_name', 'first_name'),
-        'email',
-        'password',
-        ('is_superuser', 'is_staff', 'is_active'),
-        ('date_joined', 'last_login'),
-        'groups'
-    )
+    form = UserChangeForm
+    model = User
     search_fields = (
         'username',
         'email',
