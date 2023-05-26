@@ -125,7 +125,7 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
-    def __create_ingredients(self, ingredients, recipe):
+    def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
             RecipeIngredients.objects.bulk_create(
                 [
