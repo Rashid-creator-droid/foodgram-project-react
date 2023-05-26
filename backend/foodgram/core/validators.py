@@ -1,5 +1,7 @@
 from rest_framework.validators import ValidationError
 
+from foodgram.settings import MIN_AMOUNT, MAX_AMOUNT
+
 
 def validate_ingredients(data):
     if not data:
@@ -8,11 +10,11 @@ def validate_ingredients(data):
         )
     for ingredient in data:
         amount = int(ingredient.get('amount'))
-        if amount < 1:
+        if amount < MIN_AMOUNT:
             raise ValidationError(
                 {'amount': 'Количество не может быть меньше 1'}
             )
-        if amount > 1000:
+        if amount > MAX_AMOUNT:
             raise ValidationError(
                 {'amount': 'Количество не может быть меньше 1000'}
             )
