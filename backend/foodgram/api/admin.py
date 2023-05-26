@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.forms import UserChangeForm
 from django.utils.safestring import mark_safe
 
 from recipe.models import Ingredient, Recipe, Tag, Favorites, Basket
@@ -20,11 +19,6 @@ class IngredientAdmin(admin.ModelAdmin):
     )
 
 
-class UserChangeForm(UserChangeForm):
-    class Meta(UserChangeForm.Meta):
-        model = User
-
-
 @admin.register(User)
 class UserAdmin(UserAdmin):
     list_display = (
@@ -33,8 +27,15 @@ class UserAdmin(UserAdmin):
         'first_name',
         'last_name',
     )
-    form = UserChangeForm
-    model = User
+    fields = (
+        'username',
+        ('last_name', 'first_name'),
+        'email',
+        'password',
+        ('is_superuser', 'is_staff', 'is_active'),
+        ('date_joined', 'last_login'),
+        'groups'
+    )
     search_fields = (
         'username',
         'email',
