@@ -151,6 +151,10 @@ class Favorites(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
                 name='uniquefavorit'
+            ),
+            models.CheckConstraint(
+                check=~models.Q(user=models.F('recipe')),
+                name='author_user'
             )
         ]
 
@@ -175,5 +179,9 @@ class Basket(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
                 name='uniquebasket'
+            ),
+            models.CheckConstraint(
+                check=~models.Q(user=models.F('recipe')),
+                name='author_user'
             )
         ]
