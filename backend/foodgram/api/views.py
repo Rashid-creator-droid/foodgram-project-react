@@ -9,7 +9,6 @@ from rest_framework.response import Response
 
 from api.filters import RecipeFilter
 from core.pagination import LargeResultsSetPagination
-from foodgram.settings import FIRST_INDEX
 from recipe.models import (
     Tag,
     Recipe,
