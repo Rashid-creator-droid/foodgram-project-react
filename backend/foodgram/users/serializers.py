@@ -44,7 +44,9 @@ class SignUpSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
         return Follow.objects.filter(
-            author=obj.id, user=user.id).exists()
+            author=obj.id,
+            user=user.id,
+        ).exists()
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
@@ -87,7 +89,9 @@ class FollowSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
         return Follow.objects.filter(
-            author=obj.author, user=user).exists()
+            author=obj.author,
+            user=user,
+        ).exists()
 
     def get_recipes(self, obj):
         limit = self.context.get('request').GET.get('recipes_limit')
@@ -97,6 +101,5 @@ class FollowSerializer(serializers.ModelSerializer):
         serializer = SpecialRecipeSerializer(recipe_obj, many=True)
         return serializer.data
 
-    @staticmethod
-    def get_recipes_count(obj):
+    def get_recipes_count(self, obj):
         return obj.author.recipe.count()

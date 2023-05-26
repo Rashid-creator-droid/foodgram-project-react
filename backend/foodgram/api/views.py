@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
-from core.filters import RecipeFilter
+from api.filters import RecipeFilter
 from core.pagination import LargeResultsSetPagination
 from recipe.models import (
     Tag,

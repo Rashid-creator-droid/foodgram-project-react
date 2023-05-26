@@ -81,19 +81,18 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time',
         ]
 
-    @staticmethod
-    def get_ingredients(obj):
+    def __get_ingredients(self, obj):
         ingredient = RecipeIngredients.objects.filter(recipe=obj)
         return IngredientInRecipeSerializer(ingredient, many=True).data
 
-    def get_is_favorited(self, obj):
+    def __get_is_favorited(self, obj):
         request = self.context.get('request')
         user = request.user
         if request is None or user.is_anonymous:
             return False
         return Favorites.objects.filter(recipe=obj, user=user).exists()
 
-    def get_is_in_shopping_cart(self, obj):
+    def __get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
         user = request.user
         if request is None or request.user.is_anonymous:
@@ -126,8 +125,7 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
-    @staticmethod
-    def create_ingredients(ingredients, recipe):
+    def __create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
             RecipeIngredients.objects.bulk_create(
                 [

@@ -6,10 +6,6 @@ def validate_ingredients(data):
         raise ValidationError(
             {'ingredients': 'Обязательное поле.'}
         )
-    if len(data) < 1:
-        raise ValidationError(
-            {'ingredients': 'Отсутствуют ингредиенты'}
-        )
     for ingredient in data:
         amount = int(ingredient.get('amount'))
         if amount < 1:

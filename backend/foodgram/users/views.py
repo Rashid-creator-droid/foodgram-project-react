@@ -11,8 +11,11 @@ from rest_framework.response import Response
 
 from core.pagination import LargeResultsSetPagination
 from users.models import User, Follow
-from .serializers import MeSerializer, \
-    SignUpSerializer, FollowSerializer
+from .serializers import (
+    MeSerializer,
+    SignUpSerializer,
+    FollowSerializer,
+)
 
 
 class SignUp(UserViewSet):

@@ -20,7 +20,7 @@ ALLOWED_HOSTS = ['158.160.99.26', 'backend', 'backend:8000']
 
 # CSRF
 
-CSRF_TRUSTED_ORIGINS = ['http://*.158.160.99.26', 'http://158.160.99.26']
+# CSRF_TRUSTED_ORIGINS = ['http://*.158.160.99.26', 'http://158.160.99.26']
 CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_DOMAIN = '.158.160.99.26'
 
@@ -166,3 +166,8 @@ DJOSER = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DATE_TIME_FORMAT = '%d/%m/%Y %H:%M'
+
+# Constants
+
+PAGE_SIZE = 6
+INDEX_DOWNLOAD_BASKET = 1
