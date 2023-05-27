@@ -81,7 +81,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         removable.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def pdf_generated(self, user):
+    def generated_pdf(self, user):
         ingredients = RecipeIngredients.objects.filter(
             recipe__basket__user=user
         ).values(
@@ -149,7 +149,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_cart(self, request):
         response = HttpResponse(
-            bytes(self.pdf_generated(request.user)),
+            bytes(self.generated_pdf(request.user)),
             content_type='application/pdf',
             status=status.HTTP_200_OK,
         )

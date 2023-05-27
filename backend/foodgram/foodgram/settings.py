@@ -24,7 +24,7 @@ ALLOWED_HOSTS = ['158.160.99.26', 'backend', 'backend:8000']
 
 CSRF_TRUSTED_ORIGINS = ['https://158.160.99.26', 'http://158.160.99.26']
 CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_DOMAIN = '.158.160.99.26'
+CSRF_COOKIE_DOMAIN = '158.160.99.26'
 
 # Application definition
 
