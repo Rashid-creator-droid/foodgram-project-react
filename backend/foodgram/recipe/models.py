@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import DateTimeField
 
 from core.validators import file_size
-from foodgram.settings import MAX_AMOUNT, MIN_AMOUNT
+from django.conf import settings
 
 User = get_user_model()
 
@@ -80,11 +80,11 @@ class Recipe(models.Model):
         verbose_name='Время приготовления',
         validators=[
             MaxValueValidator(
-                MAX_AMOUNT,
+                settings.MAX_AMOUNT,
                 message='Время приготовления не может быть таким большим'
             ),
             MinValueValidator(
-                MIN_AMOUNT,
+                settings.MIN_AMOUNT,
                 message='Время приготовления не может быть меньше 1 минуты',
             )
         ],
@@ -118,11 +118,11 @@ class RecipeIngredients(models.Model):
         verbose_name='Количество',
         validators=[
             MaxValueValidator(
-                MAX_AMOUNT,
+                settings.MAX_AMOUNT,
                 message='Количество ингредиентов слишком большое'
             ),
             MinValueValidator(
-                MIN_AMOUNT,
+                settings.MIN_AMOUNT,
                 message='Количество ингредиентов не может быть меньше 1',
             )
         ],
