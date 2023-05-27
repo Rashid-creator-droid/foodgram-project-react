@@ -3,9 +3,9 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import DateTimeField
+from django.conf import settings
 
 from core.validators import file_size
-from django.conf import settings
 
 User = get_user_model()
 
