@@ -27,6 +27,39 @@ from .serializers import (
 )
 
 
+def generated_pdf(user):
+    ingredients = RecipeIngredients.objects.filter(
+        recipe__basket__user=user
+    ).values(
+        'ingredient__name',
+        'ingredient__measurement_unit'
+    ).annotate(
+        ingredient_amount=Sum('amount')
+    )
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.add_font(
+        'DejaVu',
+        '',
+        './core/fonts/timesnewromanpsmt.ttf',
+        uni=True,
+    )
+    pdf.set_font('DejaVu', size=14)
+    pdf.cell(
+        w=0,
+        txt=f'Список ингредиентов пользователя {user.username}',
+        align='C',
+    )
+    pdf.ln(10)
+    for index, ingredient in enumerate(ingredients):
+        name = ingredient['ingredient__name']
+        unit = ingredient['ingredient__measurement_unit']
+        amount = ingredient['ingredient_amount']
+        pdf.cell(50, 10, f'{index + 1}) {name} {amount} {unit}')
+        pdf.ln()
+    return pdf.output()
+
+
 class IngredientFilter(filters.SearchFilter):
     search_param = 'name'
 
@@ -81,38 +114,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         removable.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def generated_pdf(self, user):
-        ingredients = RecipeIngredients.objects.filter(
-            recipe__basket__user=user
-        ).values(
-            'ingredient__name',
-            'ingredient__measurement_unit'
-        ).annotate(
-            ingredient_amount=Sum('amount')
-        )
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.add_font(
-            'DejaVu',
-            '',
-            './core/fonts/timesnewromanpsmt.ttf',
-            uni=True,
-        )
-        pdf.set_font('DejaVu', size=14)
-        pdf.cell(
-            w=0,
-            txt=f'Список ингредиентов пользователя {user.username}',
-            align='C',
-        )
-        pdf.ln(10)
-        for index, ingredient in enumerate(ingredients):
-            name = ingredient['ingredient__name']
-            unit = ingredient['ingredient__measurement_unit']
-            amount = ingredient['ingredient_amount']
-            pdf.cell(50, 10, f'{index + 1}) {name} {amount} {unit}')
-            pdf.ln()
-        return pdf.output()
-
     @action(
         detail=True,
         methods=['post', 'delete'],
@@ -149,7 +150,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_cart(self, request):
         response = HttpResponse(
-            bytes(self.generated_pdf(request.user)),
+            bytes(generated_pdf(request.user)),
             content_type='application/pdf',
             status=status.HTTP_200_OK,
         )
