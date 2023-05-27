@@ -154,7 +154,7 @@ class Favorites(models.Model):
             ),
             models.CheckConstraint(
                 check=~models.Q(user=models.F('recipe')),
-                name='author_user'
+                name='favoriteuniq'
             )
         ]
 
@@ -182,6 +182,6 @@ class Basket(models.Model):
             ),
             models.CheckConstraint(
                 check=~models.Q(user=models.F('recipe')),
-                name='author_user'
+                name='basketuniq'
             )
         ]

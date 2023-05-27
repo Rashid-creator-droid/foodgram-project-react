@@ -63,7 +63,7 @@ class Follow(models.Model):
             ),
             models.CheckConstraint(
                 check=~models.Q(user=models.F('author')),
-                name='author_user'
+                name='followuniq'
             )
         ]
 
