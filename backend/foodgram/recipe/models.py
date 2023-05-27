@@ -4,6 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import DateTimeField
 
+from core.validators import file_size
 from foodgram.settings import MAX_AMOUNT, MIN_AMOUNT
 
 User = get_user_model()
@@ -62,6 +63,7 @@ class Recipe(models.Model):
     image = models.ImageField(
         verbose_name='Картинка',
         upload_to='recipe/images',
+        validators=[file_size],
     )
     text = models.TextField(verbose_name='Описание', max_length=1000)
     ingredients = models.ManyToManyField(

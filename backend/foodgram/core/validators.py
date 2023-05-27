@@ -1,6 +1,15 @@
 from rest_framework.validators import ValidationError
+from django.core.exceptions import ValidationError as ValidateModelImage
 
-from foodgram.settings import MIN_AMOUNT, MAX_AMOUNT
+from foodgram.settings import MIN_AMOUNT, MAX_AMOUNT, IMAGE_SIZE
+
+
+def file_size(value):
+    limit = IMAGE_SIZE
+    if value.size > limit:
+        raise ValidateModelImage(
+            'Размер изображения не должен превышать 512 kb.'
+        )
 
 
 def validate_ingredients(data):

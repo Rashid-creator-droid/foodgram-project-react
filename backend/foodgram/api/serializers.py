@@ -1,7 +1,7 @@
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
-from core.validators import validate_ingredients
+from core.validators import validate_ingredients, file_size
 from recipe.models import (
     Tag,
     Recipe,
@@ -137,6 +137,16 @@ class RecipeEditSerializer(serializers.ModelSerializer):
                 ]
             )
 
+    def validate_image(self, image):
+        file_size(image)
+        return image
+
+    def validate(self, data):
+        ingredients = self.initial_data.get('ingredients')
+        valid_ingredients = validate_ingredients(ingredients)
+        data['ingredients'] = valid_ingredients
+        return data
+
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
@@ -144,12 +154,6 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         recipe.tags.set(tags)
         self.__create_ingredients(ingredients, recipe)
         return recipe
-
-    def validate(self, data):
-        ingredients = self.initial_data.get('ingredients')
-        valid_ingredients = validate_ingredients(ingredients)
-        data['ingredients'] = valid_ingredients
-        return data
 
     def update(self, instance, validated_data):
         if 'ingredients' in validated_data:
