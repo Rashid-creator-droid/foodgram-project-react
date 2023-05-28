@@ -16,7 +16,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='valen_server.env')
 
 # SECURITY WARNING:don't run with debug turned on in production!
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['158.160.99.26', 'backend', 'backend:8000']
 
