@@ -12,9 +12,6 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = (
         'name',
     )
-    list_filter = (
-        'name',
-    )
 
 
 class IngredientsInLine(admin.TabularInline):
